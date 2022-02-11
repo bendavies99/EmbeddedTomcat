@@ -1,0 +1,5 @@
+rootProject.name = 'EmbeddedTomcat'
+
+include 'testapp'
+include 'tomcat-server'
+include 'plugin'

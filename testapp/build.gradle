@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "net.bdavies.embedded-tomcat:plugin:0.0.1-SNAPSHOT"
+    }
+}
+
+plugins {
+    id 'java-library'
+}
+
+apply plugin: 'net.bdavies.embedded-tomcat'
+
+
+repositories {
+    mavenCentral()
+}
+
+
+tomcat {
+    webAppResources = [file('css')]
+}
+
+dependencies{
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
+    implementation 'org.apache.logging.log4j:log4j-web:2.17.0'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
+}
