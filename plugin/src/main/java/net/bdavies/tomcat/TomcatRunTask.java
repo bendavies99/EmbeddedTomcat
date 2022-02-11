@@ -61,7 +61,7 @@ public class TomcatRunTask extends Exec {
         addDependency("io.reactivex:rxjava:1.3.8");
         addDependency("org.projectlombok:lombok:1.18.22");
         addDependency("javax.servlet:javax.servlet-api:4.0.1");
-        addDependency("net.bdavies:tomcat-server:0.0.1-SNAPSHOT");
+        addDependency("net.bdavies.embedded-tomcat:tomcat-server:0.0.1-SNAPSHOT");
 
 
         val config = getProject().getConfigurations().getByName("runnerDeps");
