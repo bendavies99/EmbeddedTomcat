@@ -24,15 +24,13 @@ public class DefaultTomcatServerData implements TomcatServerData {
     private String servletPath;
     private File compiledLocation;
     private final File webAppBaseDirectory;
-    private final List<File> runtimeClasspath;
     private final String compileClasspath;
     private List<File> srcDirectories, webAppResources;
     private int port, shutdownPort;
     private String sourceCompatability, targetCompatability;
 
-    public DefaultTomcatServerData(File webappBaseDirectory, List<File> runtimeClasspath, String compileClasspath) {
+    public DefaultTomcatServerData(File webappBaseDirectory, String compileClasspath) {
         this.webAppBaseDirectory = webappBaseDirectory;
-        this.runtimeClasspath = runtimeClasspath;
         this.compileClasspath = compileClasspath;
         this.applicationProperties = new Properties();
         this.servletPath = ""; //Use ROOT by default

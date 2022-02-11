@@ -30,7 +30,6 @@ public class ArgParser {
     public TomcatServerData getData() {
         val sd = new DefaultTomcatServerData(
                 argumentToFile(argMap.get("webApp")),
-                getFiles("runtimeClasspath").orElse(new LinkedList<>()),
                 getArgument("compileClasspath").orElse("")
         );
         getFile("classesDir").ifPresent(sd::setCompiledLocation);

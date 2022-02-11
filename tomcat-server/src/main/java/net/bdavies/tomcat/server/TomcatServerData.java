@@ -41,13 +41,6 @@ public interface TomcatServerData {
      *
      * @return the file
      */
-    List<File> getRuntimeClasspath();
-
-    /**
-     * Get the webapp runtime classpath
-     *
-     * @return the file
-     */
     String getCompileClasspath();
 
     /**

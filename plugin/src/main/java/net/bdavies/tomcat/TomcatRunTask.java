@@ -90,7 +90,6 @@ public class TomcatRunTask extends Exec {
         addArgument(args, "webApp", webAppDir);
         addArgument(args, "webAppResources", settings.getWebAppResources());
         addArgument(args, "classesDir", classes);
-        addArgument(args, "runtimeClasspath", mainSourceSet.getRuntimeClasspath().getFiles());
         addArgument(args, "compileClasspath", mainSourceSet.getCompileClasspath().getAsPath());
         addArgument(args, "srcDirectories", sources);
         addArgument(args, "applicationProperties", settings.getApplicationProperties() == null ? getProject().file("app.properties") : settings.getApplicationProperties());

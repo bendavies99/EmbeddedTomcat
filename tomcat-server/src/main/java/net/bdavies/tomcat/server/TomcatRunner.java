@@ -50,7 +50,6 @@ public class TomcatRunner implements Runnable {
         this.data = data;
         this.thread = new Thread(this, "TomcatRunner-" + data.getPort());
         this.handle = new ShutdownHandle();
-        log.info("Files in runtime classpath: {}", data.getRuntimeClasspath());
         this.server = new Server(Constants.DEFAULT_LR_PORT);
 //        thread.setContextClassLoader(classLoader);
     }
