@@ -44,6 +44,27 @@ public interface TomcatServerData {
     String getCompileClasspath();
 
     /**
+     * Get the webapp runtime classpath
+     *
+     * @return the file
+     */
+    String getRuntimeClasspath();
+
+    /**
+     * Get the webapp jars to skip scanning
+     *
+     * @return the string ,
+     */
+    String getJarsToSkip();
+
+    /**
+     * Get the webapp jars to ensure scanning
+     *
+     * @return the string ,
+     */
+    String getJarsToScan();
+
+    /**
      * The target java version
      *
      * @return a java version

@@ -10,11 +10,22 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
+import org.apache.catalina.webresources.FileResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.tomcat.JarScanFilter;
+import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.descriptor.web.ContextEnvironment;
+import org.apache.tomcat.util.scan.StandardJarScanFilter;
+import org.apache.tomcat.util.scan.StandardJarScanner;
 import rx.Observable;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,12 +56,14 @@ public class TomcatRunner implements Runnable {
     private boolean isRunning;
     private final ShutdownHandle handle;
     private final Server server;
+//    private final ClassLoader runtimeClassloader;
 
     public TomcatRunner(TomcatServerData data) {
         this.data = data;
         this.thread = new Thread(this, "TomcatRunner-" + data.getPort());
         this.handle = new ShutdownHandle();
         this.server = new Server(Constants.DEFAULT_LR_PORT);
+//        this.runtimeClassloader = getClassLoaderFromClassPath(data.getRuntimeClasspath());
 //        thread.setContextClassLoader(classLoader);
     }
 
@@ -71,6 +84,19 @@ public class TomcatRunner implements Runnable {
         } catch (InterruptedException e) {
             log.error("Couldn't stop thread {} something went wrong", thread.getName(), e);
         }
+    }
+
+    private URLClassLoader getClassLoaderFromClassPath(String mainCp) {
+        List<File> files = Arrays.stream(mainCp.split(System.getProperty("path.separator"))).map(File::new)
+                .collect(Collectors.toList());
+        return new URLClassLoader(files.stream().map(f -> {
+            try {
+                return f.toURI().toURL();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).toArray(URL[]::new));
     }
 
     public static void main(String[] args) {
@@ -109,6 +135,19 @@ public class TomcatRunner implements Runnable {
         setupResources(context);
         context.addLifecycleListener(new TomcatStartListener(data));
 
+        StandardJarScanner scanner = new StandardJarScanner();
+        StandardJarScanFilter filter = new StandardJarScanFilter();
+        if (!data.getJarsToSkip().equals("--")) {
+            filter.setPluggabilitySkip(data.getJarsToSkip());
+            filter.setTldSkip(data.getJarsToSkip());
+        }
+        if (!data.getJarsToScan().equals("--")) {
+            filter.setPluggabilityScan(data.getJarsToScan());
+            filter.setTldScan(data.getJarsToScan());
+        }
+        scanner.setJarScanFilter(filter);
+        context.setJarScanner(scanner);
+
         //Silence Tomcat
         tomcat.setSilent(true);
         setupLiveReload();
@@ -137,8 +176,13 @@ public class TomcatRunner implements Runnable {
         DirResourceSet set = new DirResourceSet(root, "/WEB-INF/classes", absPath, "/");
         root.addPreResources(set);
         data.getWebAppResources().forEach(f -> {
-            val rSet = new DirResourceSet(root, "/", f.getAbsolutePath(), "/");
-            root.addPreResources(rSet);
+            if (f.isFile()) {
+                val rSet = new FileResourceSet(root, "/", f.getAbsolutePath(), "/");
+                root.addPreResources(rSet);
+            } else {
+                val rSet = new DirResourceSet(root, "/", f.getAbsolutePath(), "/");
+                root.addPreResources(rSet);
+            }
         });
         context.setResources(root);
     }

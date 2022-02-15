@@ -24,14 +24,16 @@ public class DefaultTomcatServerData implements TomcatServerData {
     private String servletPath;
     private File compiledLocation;
     private final File webAppBaseDirectory;
-    private final String compileClasspath;
+    private final String compileClasspath, runtimeClasspath;
     private List<File> srcDirectories, webAppResources;
     private int port, shutdownPort;
     private String sourceCompatability, targetCompatability;
+    private String jarsToSkip, jarsToScan;
 
-    public DefaultTomcatServerData(File webappBaseDirectory, String compileClasspath) {
+    public DefaultTomcatServerData(File webappBaseDirectory, String compileClasspath, String runtimeClasspath) {
         this.webAppBaseDirectory = webappBaseDirectory;
         this.compileClasspath = compileClasspath;
+        this.runtimeClasspath = runtimeClasspath;
         this.applicationProperties = new Properties();
         this.servletPath = ""; //Use ROOT by default
         this.compiledLocation = webappBaseDirectory.toPath().resolve(Path.of("WEB-INF", "classes")).toFile(); //Use WEB-INF/classes by default
@@ -41,5 +43,7 @@ public class DefaultTomcatServerData implements TomcatServerData {
         this.sourceCompatability = "11"; //Java 11 by default
         this.targetCompatability = "11"; //Java 11 by default
         this.webAppResources = new LinkedList<>();
+        this.jarsToSkip = "--";
+        this.jarsToScan = "--";
     }
 }

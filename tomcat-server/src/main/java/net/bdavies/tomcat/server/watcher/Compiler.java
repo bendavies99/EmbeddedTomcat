@@ -1,6 +1,6 @@
 package net.bdavies.tomcat.server.watcher;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 import org.eclipse.jdt.core.compiler.CompilationProgress;
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 import org.slf4j.helpers.SubstituteLoggerFactory;
@@ -13,7 +13,6 @@ import java.util.List;
 /**
  * @author ben.davies
  */
-@Slf4j
 public class Compiler {
     public void compileFile(File fileToCompile, String compileClassPath, String sourceCompatability, String targetCompatability,
                             String outputDir, String sourcePath, Runnable onComplete) {
@@ -47,12 +46,13 @@ public class Compiler {
                 new PrintWriter(System.err), new CompilationProgress() {
                     @Override
                     public void begin(int remainingWork) {
-                        log.debug("Started compile of {}", fileToCompile.getName());
+                        System.out.println("Started compile of: " + fileToCompile.getName());
+                        System.out.println("-- remaining work: " + remainingWork);
                     }
 
                     @Override
                     public void done() {
-                        log.debug("Completed compile of {}", fileToCompile.getName());
+                        System.out.println("Completed compile of: " + fileToCompile.getName());
                         onComplete.run();
                     }
 
@@ -63,12 +63,11 @@ public class Compiler {
 
                     @Override
                     public void setTaskName(String name) {
-
+                        System.out.println("Current Compile task: " + name);
                     }
 
                     @Override
                     public void worked(int workIncrement, int remainingWork) {
-
                     }
                 });
     }

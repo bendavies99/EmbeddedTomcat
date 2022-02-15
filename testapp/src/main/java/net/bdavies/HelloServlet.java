@@ -21,7 +21,7 @@ public class HelloServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         val out = resp.getOutputStream();
-        out.write("Servlet works".getBytes(StandardCharsets.UTF_8));
+        out.write("Servlet works test".getBytes(StandardCharsets.UTF_8));
         out.flush();
         out.close();
     }

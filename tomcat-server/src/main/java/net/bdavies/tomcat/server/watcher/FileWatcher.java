@@ -41,7 +41,9 @@ public class FileWatcher implements Runnable {
         //TODO: Find a better way to know the index of the srcs containing the java files
         srcDir = new ArrayList<>(sources).get(1).getAbsolutePath();
         for (val source : sources) {
-            registerAll(source.toPath());
+            if (source.isDirectory()) {
+                registerAll(source.toPath());
+            }
         }
     }
 

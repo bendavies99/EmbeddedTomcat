@@ -3,6 +3,7 @@ package net.bdavies.tomcat;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.io.FileUtils;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.plugins.JavaPluginExtension;
@@ -10,19 +11,25 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Exec;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.internal.jvm.Jvm;
+import org.gradle.internal.os.OperatingSystem;
 import org.gradle.jvm.toolchain.JavaLauncher;
+import org.gradle.jvm.toolchain.internal.DefaultToolchainJavaLauncher;
+import org.gradle.jvm.toolchain.internal.JavaToolchain;
 import org.gradle.process.internal.ExecAction;
 
-import java.io.File;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author ben.davies
@@ -60,9 +67,8 @@ public class TomcatRunTask extends Exec {
         addDependency("org.eclipse.jdt:core:3.3.0-v_771");
         addDependency("io.reactivex:rxjava:1.3.8");
         addDependency("org.projectlombok:lombok:1.18.22");
-        addDependency("javax.servlet:javax.servlet-api:4.0.1");
         addDependency("net.bdavies.embedded-tomcat:tomcat-server:0.0.1-SNAPSHOT");
-
+        addDependency("javax.servlet:javax.servlet-api:4.0.1");
 
         val config = getProject().getConfigurations().getByName("runnerDeps");
         val depLocations = config.files(config.getAllDependencies().toArray(new Dependency[0]));
@@ -72,25 +78,41 @@ public class TomcatRunTask extends Exec {
 
         val webAppDir = this.getProject().getProjectDir();
 
-        val mainCp = Stream.concat(depLocations.stream(),
-                mainSourceSet.getRuntimeClasspath().getFiles().stream()).map(File::getAbsolutePath)
-                .collect(Collectors.joining(System.getProperty("path.separator")));
+        val mainCp = Stream.concat(depLocations.stream(), mainSourceSet.getRuntimeClasspath().getFiles().stream())
+                .collect(Collectors.toList())
+                .stream().map(File::getAbsolutePath).collect(Collectors.joining(System.getProperty("path.separator")));
 
-        URLClassLoader classLoader = getClassLoaderFromClassPath(mainCp);
-        System.out.println(classLoader.loadClass("org.apache.catalina.LifecycleException"));
+
+        //Add jars to skip
 
         List<String> args = new LinkedList<>();
         args.add("-Dname=GradleTomcatRunner");
         args.add("-javaagent:" + lombokFile.getAbsolutePath() + "=EJC");
-        args.add("-classpath");
-        args.add(mainCp);
         args.add("net.bdavies.tomcat.server.TomcatRunner");
+
+        val f = getProject().getBuildDir().toPath().resolve("cmplCp.txt").toFile();
+        FileUtils.write(f, mainSourceSet.getCompileClasspath().getAsPath(), StandardCharsets.UTF_8);
+
+        val runtimeCp = getProject().getBuildDir().toPath().resolve("runtimeCp.txt").toFile();
+        FileUtils.write(runtimeCp, mainSourceSet.getRuntimeClasspath().getAsPath(), StandardCharsets.UTF_8);
+
+        List<String> jarsToSkip = getJarsToSkip(Stream.concat(depLocations.stream(),
+                        mainSourceSet.getRuntimeClasspath().getFiles().stream())
+                .collect(Collectors.toList()));
+        val jToSkip = getProject().getBuildDir().toPath().resolve("jarsToSkip.txt").toFile();
+        FileUtils.write(jToSkip, String.join(",", jarsToSkip), StandardCharsets.UTF_8);
+
+        val jToScan = getProject().getBuildDir().toPath().resolve("jarsToScan.txt").toFile();
+        FileUtils.write(jToScan, String.join(",", settings.getJarsToScan()), StandardCharsets.UTF_8);
 
         //Set the program args
         addArgument(args, "webApp", webAppDir);
         addArgument(args, "webAppResources", settings.getWebAppResources());
         addArgument(args, "classesDir", classes);
-        addArgument(args, "compileClasspath", mainSourceSet.getCompileClasspath().getAsPath());
+        addArgument(args, "compileClasspath", f.getAbsolutePath());
+        addArgument(args, "runtimeClasspath", runtimeCp);
+        addArgument(args, "jarsToSkip", jToSkip);
+        addArgument(args, "jarsToScan", jToScan);
         addArgument(args, "srcDirectories", sources);
         addArgument(args, "applicationProperties", settings.getApplicationProperties() == null ? getProject().file("app.properties") : settings.getApplicationProperties());
         addArgument(args, "port", settings.getPort());
@@ -104,23 +126,19 @@ public class TomcatRunTask extends Exec {
         ExecAction javaExecAction = getExecActionFactory().newExecAction();
         javaExecAction.args(args);
         javaExecAction.setArgs(args);
+        System.out.println("Setting the CLASSPATH to " + mainCp);
+        javaExecAction.setEnvironment(Map.of("CLASSPATH", mainCp));
         javaExecAction.setExecutable(getJavaExecutable());
         val result = javaExecAction.execute();
         System.out.println("Finished executing: java " +
                 String.join(" ", args) + " with code: " + result.getExitValue());
     }
 
-    private URLClassLoader getClassLoaderFromClassPath(String mainCp) {
-        List<File> files = Arrays.stream(mainCp.split(System.getProperty("path.separator"))).map(File::new)
+    private List<String> getJarsToSkip(List<File> files) {
+        return files.stream()
+                .filter(File::isFile)
+                .map(File::getName)
                 .collect(Collectors.toList());
-        return new URLClassLoader(files.stream().map(f -> {
-            try {
-                return f.toURI().toURL();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }).toArray(URL[]::new));
     }
 
     private void addArgument(List<String> args, String name, Object value) {
@@ -142,5 +160,21 @@ public class TomcatRunTask extends Exec {
         }
         return Jvm.current().getJavaExecutable().getAbsolutePath();
     }
+
+//    private String getJarExecutable() {
+//        if (javaLauncherProperty.isPresent()) {
+//            return javaLauncherProperty.get().getMetadata()
+//                    .getInstallationPath()
+//                    .file(OperatingSystem.current()
+//                            .getExecutableName("jar"))
+//                    .getAsFile()
+//                    .getAbsolutePath();
+//        }
+//        final String executable = getExecutable();
+//        if (executable != null) {
+//            return executable;
+//        }
+//        return Jvm.current().getExecutable("jar").getAbsolutePath();
+//    }
 
 }

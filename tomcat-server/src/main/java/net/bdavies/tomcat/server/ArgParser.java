@@ -6,9 +6,7 @@ import lombok.val;
 import net.bdavies.tomcat.server.exceptions.ArgumentNotPresentException;
 import org.eclipse.core.runtime.Path;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +17,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ArgParser {
     private final String[] args;
-    private final String[] requiredArgs = new String[] {"webApp","runtimeClasspath","compileClasspath"};
+    private final String[] requiredArgs = new String[] {"webApp","compileClasspath","runtimeClasspath"};
     private final Map<String, String> argMap;
 
     public ArgParser(String[] args) {
@@ -30,7 +28,8 @@ public class ArgParser {
     public TomcatServerData getData() {
         val sd = new DefaultTomcatServerData(
                 argumentToFile(argMap.get("webApp")),
-                getArgument("compileClasspath").orElse("")
+                readFileFromArgument("compileClasspath").orElse(""),
+                readFileFromArgument("runtimeClasspath").orElse("")
         );
         getFile("classesDir").ifPresent(sd::setCompiledLocation);
         getArgument("contextPath").ifPresent(sd::setServletPath);
@@ -41,11 +40,29 @@ public class ArgParser {
         getInteger("shutdownPort").ifPresent(sd::setShutdownPort);
         getArgument("sourceCompatability").ifPresent(sd::setSourceCompatability);
         getArgument("targetCompatability").ifPresent(sd::setTargetCompatability);
+        readFileFromArgument("jarsToSkip").ifPresent(sd::setJarsToSkip);
+        readFileFromArgument("jarsToScan").ifPresent(sd::setJarsToScan);
         return sd;
     }
 
     private File argumentToFile(String value) {
         return Path.fromOSString(value).toFile();
+    }
+
+    private Optional<String> readFileFromArgument(String key) {
+        return getFile(key).map(f -> {
+           StringBuilder sb = new StringBuilder();
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(f));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return sb.toString();
+        });
     }
 
     private Optional<File> getFile(String key) {

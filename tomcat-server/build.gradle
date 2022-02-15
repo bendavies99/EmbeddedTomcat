@@ -62,18 +62,18 @@ task testServer(type: JavaExec) {
 }
 
 dependencies {
-    implementation 'org.eclipse.jdt:ecj:3.28.0'
-    implementation 'org.eclipse.jdt:core:3.3.0-v_771'
+    compileOnly 'org.eclipse.jdt:ecj:3.28.0'
+    compileOnly 'org.eclipse.jdt:core:3.3.0-v_771'
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
-    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
-    implementation 'org.apache.logging.log4j:log4j-web:2.17.0'
-    implementation 'org.slf4j:slf4j-api:1.7.30'
-    implementation 'io.reactivex:rxjava:1.3.8'
+    compileOnly 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
+    compileOnly 'org.apache.logging.log4j:log4j-web:2.17.0'
+    compileOnly 'org.slf4j:slf4j-api:1.7.30'
+    compileOnly 'io.reactivex:rxjava:1.3.8'
 
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:8.5.71'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-logging-juli:8.5.2'
-    implementation 'javax.servlet:javax.servlet-api:4.0.1'
-    implementation 'org.apache.tomcat:tomcat-jasper:8.5.71'
+    compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.5.71'
+    compileOnly 'org.apache.tomcat.embed:tomcat-embed-logging-juli:8.5.2'
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+    compileOnly 'org.apache.tomcat:tomcat-jasper:8.5.71'
 }

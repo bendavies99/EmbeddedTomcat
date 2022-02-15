@@ -27,6 +27,7 @@ dependencies {
 
     implementation 'org.eclipse.jdt:ecj:3.28.0'
     implementation 'org.eclipse.jdt:core:3.3.0-v_771'
+    implementation 'commons-io:commons-io:2.11.0'
 }
 
 
