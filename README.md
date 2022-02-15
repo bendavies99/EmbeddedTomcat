@@ -30,8 +30,8 @@ This plugin provides a `tomcat` extension and the properties are:-
 
 Property | Type | Default Value | Description
 ------ | ------ | ------ | ------
-port   | Integer |  8080 | The port that server runs on
-shutdownPort   | Integer |  8080 | The port that will listen for a TCP packet with the ascii message of "SHUTDOWN"
+port   | java.lang.Integer |  8080 | The port that server runs on
+shutdownPort   | java.lang.Integer |  8082 | The port that will listen for a TCP packet with the ascii message of "SHUTDOWN"
 applicationProperties   | java.io.File | ${projectDir}/app.properties | A file of properties to set that you would normally set in the context.xml using <Environment ... />
 webAppResources | java.util.List<java.io.File> | empty list | A list of directories or files you wish to add to the tomcat vfs and for watching for live reload
 contextPath | java.lang.String | empty string (ROOT) | The path for the context to run by default it uses the (ROOT) path
