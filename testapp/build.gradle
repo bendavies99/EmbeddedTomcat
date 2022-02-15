@@ -1,29 +1,17 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath "net.bdavies.embedded-tomcat:plugin:0.0.1-SNAPSHOT"
-    }
-}
-
 plugins {
     id 'java-library'
 }
 
-apply plugin: 'net.bdavies.embedded-tomcat'
+//apply plugin: 'net.bdavies.embedded-tomcat'
 
 
 repositories {
     mavenCentral()
 }
 
-
-tomcat {
-    webAppResources = [file('css')]
-}
+//tomcat {
+//    webAppResources = [file('css')]
+//}
 
 dependencies{
     implementation 'javax.servlet:javax.servlet-api:4.0.1'

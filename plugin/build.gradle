@@ -1,6 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '0.18.0'
 }
 
 repositories {
@@ -35,21 +36,28 @@ gradlePlugin {
     plugins {
         embbedTomcat {
             id = 'net.bdavies.embedded-tomcat'
+            displayName = 'Embedded Tomcat Server'
+            description = 'Use Tomcat in your gradle workspace and is plug and play'
             implementationClass = 'net.bdavies.tomcat.EmbeddedTomcatPlugin'
         }
     }
 }
 
+pluginBundle {
+    website = 'https://github.com/bendavies99/EmbeddedTomcat'
+    vcsUrl = 'https://github.com/bendavies99/EmbeddedTomcat'
+    tags = ['tomcat', 'servlet', 'livereload']
+}
+
+
 
 publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/bendavies99/embedded-tomcat")
-            credentials {
-                username = "bendavies99"
-                password = System.getenv("GH_TOKEN")
-            }
+    publications {
+        java(MavenPublication) {
+            groupId = group
+            artifactId = 'plugin'
+            version = project.version
+            from(components.java)
         }
     }
 }
