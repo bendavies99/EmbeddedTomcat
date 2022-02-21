@@ -67,7 +67,7 @@ public class FileWatcher implements Runnable {
     private void registerAll(Path dir) throws IOException {
         if (dir.toString().equals(" ") || dir.toString().isEmpty()) return;
         log.debug("Registering path: {} for file changes", dir);
-        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+        Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 register(dir);
