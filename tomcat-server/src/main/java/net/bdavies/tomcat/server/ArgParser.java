@@ -3,6 +3,7 @@ package net.bdavies.tomcat.server;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.var;
 import net.bdavies.tomcat.server.exceptions.ArgumentNotPresentException;
 import org.eclipse.core.runtime.Path;
 
@@ -96,9 +97,7 @@ public class ArgParser {
 
     private Optional<String[]> getArgumentArray(String key) {
         return getArgument(key).map(v -> Arrays.stream(v.split(","))
-                .map(String::stripLeading)
-                .map(String::stripTrailing)
-                .map(String::strip).toArray(String[]::new));
+                .map(String::trim).toArray(String[]::new));
     }
 
     private Map<String, String> getArgumentMap() {
