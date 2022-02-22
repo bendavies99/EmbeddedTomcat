@@ -121,3 +121,4 @@ gradle-app.setting
 
 *.properties
 tomcat.*
+**/bin
